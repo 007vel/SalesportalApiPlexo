@@ -66,6 +66,18 @@ namespace PlexoRepPortal.Controllers
             return CreatedAtAction(nameof(Get), new { oId = document.OId }, RepDocumentDto.FromEntity(document));
         }
 
+        // GET api/documents
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RepDocumentDto>>> GetAll(CancellationToken cancellationToken)
+        {
+            var documents = await _db.RepDocuments
+                .AsNoTracking()
+                .OrderByDescending(d => d.UploadedAt)
+                .ToListAsync(cancellationToken);
+
+            return Ok(documents.Select(RepDocumentDto.FromEntity));
+        }
+
         // GET api/documents/rep/1000
         [HttpGet("rep/{repId}")]
         public async Task<ActionResult<IEnumerable<RepDocumentDto>>> GetByRep(string repId, CancellationToken cancellationToken)
