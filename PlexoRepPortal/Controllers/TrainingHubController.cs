@@ -75,6 +75,18 @@ namespace PlexoRepPortal.Controllers
             return CreatedAtAction(nameof(Get), new { oId = document.OId }, TrainingHubDocumentDto.FromEntity(document));
         }
 
+        // GET api/traininghub
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TrainingHubDocumentDto>>> GetAll(CancellationToken cancellationToken)
+        {
+            var documents = await _db.TrainingHubDocuments
+                .AsNoTracking()
+                .OrderByDescending(d => d.UploadedAt)
+                .ToListAsync(cancellationToken);
+
+            return Ok(documents.Select(TrainingHubDocumentDto.FromEntity));
+        }
+
         // GET api/traininghub/role/1000
         [HttpGet("role/{roleId}")]
         public async Task<ActionResult<IEnumerable<TrainingHubDocumentDto>>> GetByRole(string roleId, CancellationToken cancellationToken)
