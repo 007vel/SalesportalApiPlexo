@@ -1,0 +1,6 @@
+@PlexoRepPortal_HostAddress = http://localhost:5033
+
+GET {{PlexoRepPortal_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
