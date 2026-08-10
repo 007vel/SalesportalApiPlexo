@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[TrainingHubDocuments] (
     [OId]         INT            IDENTITY (1, 1) NOT NULL,
-    [RoleId]      NVARCHAR (20)  NOT NULL,
+    [RoleId]      NVARCHAR (20)  NULL,
     [Title]       NVARCHAR (200) NOT NULL,
     [Category]    NVARCHAR (100) NULL,
     [Description] NVARCHAR (1000) NULL,
@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[TrainingHubDocuments] (
     [FileName]    NVARCHAR (300) NOT NULL,
     [FilePath]    NVARCHAR (500) NOT NULL,
     [Length]      NVARCHAR (50)  NULL,
+    [UploadedBy]  NVARCHAR (10)  DEFAULT ('Rep') NOT NULL,
     [UploadedAt]  DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,
     PRIMARY KEY CLUSTERED ([OId] ASC)
 );

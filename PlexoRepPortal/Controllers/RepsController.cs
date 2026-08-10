@@ -114,6 +114,24 @@ namespace PlexoRepPortal.Controllers
             return (maxNumber + 1).ToString();
         }
 
+        // GET api/reps/validate/1000
+        [HttpGet("validate/{repId}")]
+        public async Task<ActionResult<RepDto>> ValidateRepId(string repId, CancellationToken cancellationToken)
+        {
+            var trimmedRepId = repId.Trim();
+
+            var rep = await _db.Reps
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.RepId == trimmedRepId, cancellationToken);
+
+            if (rep is null)
+            {
+                return NotFound(new { IsValid = false, Message = "RepId not found." });
+            }
+
+            return Ok(RepDto.FromEntity(rep, Domain));
+        }
+
         // POST api/reps/link
         [HttpPost("link")]
         public async Task<ActionResult<RepDto>> UpdateLinks(RepLinkUpdateRequest request, CancellationToken cancellationToken)

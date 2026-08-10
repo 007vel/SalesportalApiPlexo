@@ -63,7 +63,7 @@ namespace PlexoRepPortal.Database
 
                 entity.HasKey(d => d.OId);
 
-                entity.Property(d => d.RoleId).HasMaxLength(20).IsRequired();
+                entity.Property(d => d.RoleId).HasMaxLength(20);
                 entity.Property(d => d.Title).HasMaxLength(200).IsRequired();
                 entity.Property(d => d.Category).HasMaxLength(100);
                 entity.Property(d => d.Description).HasMaxLength(1000);
@@ -71,6 +71,7 @@ namespace PlexoRepPortal.Database
                 entity.Property(d => d.FileName).HasMaxLength(300).IsRequired();
                 entity.Property(d => d.FilePath).HasMaxLength(500).IsRequired();
                 entity.Property(d => d.Length).HasMaxLength(50);
+                entity.Property(d => d.UploadedBy).HasMaxLength(10).HasDefaultValue("Rep").IsRequired();
                 entity.Property(d => d.UploadedAt).HasDefaultValueSql("SYSUTCDATETIME()");
 
                 entity.HasIndex(d => d.RoleId);
