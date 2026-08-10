@@ -9,22 +9,24 @@ namespace PlexoRepPortal.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private const string DummyEmail = "sakthi@plexo.com";
-        private const string DummyRepId = "1000";
-
         private readonly AppDbContext _db;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(AppDbContext db)
+        public UsersController(AppDbContext db, IConfiguration configuration)
         {
             _db = db;
+            _configuration = configuration;
         }
+
+        private string? AdminEmail => _configuration["AdminLogin:Email"]?.Trim();
+        private string? AdminPassword => _configuration["AdminLogin:Password"]?.Trim();
 
         // POST api/users/validate
         [HttpPost("validate")]
-        public ActionResult<UserValidateResponse> Validate(UserValidateRequest request)
+        public ActionResult<UserValidateResponse> Validate(UserValidateRequestForAdmin request)
         {
-            var isValid = string.Equals(request.Email, DummyEmail, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(request.RepId, DummyRepId, StringComparison.Ordinal);
+            var isValid = string.Equals(request.Email, AdminEmail, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(request.Password, AdminPassword, StringComparison.Ordinal);
 
             var response = new UserValidateResponse
             {
