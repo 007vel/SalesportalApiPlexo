@@ -10,6 +10,7 @@ namespace PlexoRepPortal.Models
         public string FileType { get; set; } = null!;
         public string FileName { get; set; } = null!;
         public string? Length { get; set; }
+        public string UploadedBy { get; set; } = null!;
         public DateTime UploadedAt { get; set; }
 
         public static TrainingHubDocumentDto FromEntity(TrainingHubDocument document) => new()
@@ -22,6 +23,7 @@ namespace PlexoRepPortal.Models
             FileType = document.FileType,
             FileName = document.FileName,
             Length = document.Length,
+            UploadedBy = document.UploadedBy,
             UploadedAt = document.UploadedAt
         };
     }

@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[TrainingHubDocuments] (
     [FileName]    NVARCHAR (300) NOT NULL,
     [FilePath]    NVARCHAR (500) NOT NULL,
     [Length]      NVARCHAR (50)  NULL,
+    [UploadedBy]  NVARCHAR (10)  DEFAULT ('Rep') NOT NULL,
     [UploadedAt]  DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,
     PRIMARY KEY CLUSTERED ([OId] ASC)
 );

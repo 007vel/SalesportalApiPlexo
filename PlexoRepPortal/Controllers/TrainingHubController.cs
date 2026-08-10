@@ -11,6 +11,8 @@ namespace PlexoRepPortal.Controllers
     public class TrainingHubController : ControllerBase
     {
         private const string StorageRoot = @"C:\pwr_docs\TrainingHub";
+        private const string UploadedByAdmin = "Admin";
+        private const string UploadedByRep = "Rep";
 
         private static readonly string[] VideoExtensions = { ".mp4", ".mov", ".avi", ".webm", ".mkv", ".m4v" };
         private static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp" };
@@ -29,6 +31,7 @@ namespace PlexoRepPortal.Controllers
             [FromForm] string roleId,
             [FromForm] string title,
             [FromForm] IFormFile file,
+            [FromForm] string uploadedBy,
             [FromForm] string? category,
             [FromForm] string? description,
             [FromForm] string? length,
@@ -42,6 +45,12 @@ namespace PlexoRepPortal.Controllers
             if (string.IsNullOrWhiteSpace(title))
             {
                 return BadRequest("Title is required.");
+            }
+
+            if (!string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(uploadedBy, UploadedByRep, StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest($"UploadedBy must be '{UploadedByRep}' or '{UploadedByAdmin}'.");
             }
 
             Directory.CreateDirectory(StorageRoot);
@@ -66,6 +75,7 @@ namespace PlexoRepPortal.Controllers
                 FileName = originalFileName,
                 FilePath = filePath,
                 Length = fileType == "Video" && !string.IsNullOrWhiteSpace(length) ? length : null,
+                UploadedBy = string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase) ? UploadedByAdmin : UploadedByRep,
                 UploadedAt = DateTime.UtcNow
             };
 
@@ -94,6 +104,40 @@ namespace PlexoRepPortal.Controllers
             var documents = await _db.TrainingHubDocuments
                 .AsNoTracking()
                 .Where(d => d.RoleId == roleId)
+                .OrderByDescending(d => d.UploadedAt)
+                .ToListAsync(cancellationToken);
+
+            return Ok(documents.Select(TrainingHubDocumentDto.FromEntity));
+        }
+
+        // GET api/traininghub/filter?roleId=1000&includeAdmin=true
+        // includeAdmin=true, roleId set    -> that role's documents + all Admin documents
+        // includeAdmin=true, roleId empty  -> only Admin documents
+        // includeAdmin=false               -> only that role's documents
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<TrainingHubDocumentDto>>> GetByRoleAndAdmin(
+            [FromQuery] string? roleId,
+            [FromQuery] bool includeAdmin,
+            CancellationToken cancellationToken)
+        {
+            var trimmedRoleId = roleId?.Trim();
+
+            var query = _db.TrainingHubDocuments.AsNoTracking();
+
+            if (includeAdmin && string.IsNullOrEmpty(trimmedRoleId))
+            {
+                query = query.Where(d => d.UploadedBy == UploadedByAdmin);
+            }
+            else if (includeAdmin)
+            {
+                query = query.Where(d => d.RoleId == trimmedRoleId || d.UploadedBy == UploadedByAdmin);
+            }
+            else
+            {
+                query = query.Where(d => d.RoleId == trimmedRoleId);
+            }
+
+            var documents = await query
                 .OrderByDescending(d => d.UploadedAt)
                 .ToListAsync(cancellationToken);
 
