@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[TrainingHubDocuments] (
     [OId]         INT            IDENTITY (1, 1) NOT NULL,
-    [RoleId]      NVARCHAR (20)  NOT NULL,
+    [RoleId]      NVARCHAR (20)  NULL,
     [Title]       NVARCHAR (200) NOT NULL,
     [Category]    NVARCHAR (100) NULL,
     [Description] NVARCHAR (1000) NULL,

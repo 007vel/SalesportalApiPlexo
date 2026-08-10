@@ -3,7 +3,7 @@ namespace PlexoRepPortal.Models
     public class TrainingHubDocumentDto
     {
         public int OId { get; set; }
-        public string RoleId { get; set; } = null!;
+        public string? RoleId { get; set; }
         public string Title { get; set; } = null!;
         public string? Category { get; set; }
         public string? Description { get; set; }

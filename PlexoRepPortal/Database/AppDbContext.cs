@@ -63,7 +63,7 @@ namespace PlexoRepPortal.Database
 
                 entity.HasKey(d => d.OId);
 
-                entity.Property(d => d.RoleId).HasMaxLength(20).IsRequired();
+                entity.Property(d => d.RoleId).HasMaxLength(20);
                 entity.Property(d => d.Title).HasMaxLength(200).IsRequired();
                 entity.Property(d => d.Category).HasMaxLength(100);
                 entity.Property(d => d.Description).HasMaxLength(1000);

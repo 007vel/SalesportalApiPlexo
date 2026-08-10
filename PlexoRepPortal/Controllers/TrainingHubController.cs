@@ -28,7 +28,7 @@ namespace PlexoRepPortal.Controllers
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<TrainingHubDocumentDto>> Upload(
-            [FromForm] string roleId,
+            [FromForm] string? roleId,
             [FromForm] string title,
             [FromForm] IFormFile file,
             [FromForm] string uploadedBy,
@@ -67,7 +67,7 @@ namespace PlexoRepPortal.Controllers
 
             var document = new TrainingHubDocument
             {
-                RoleId = roleId,
+                RoleId = string.IsNullOrWhiteSpace(roleId) ? null : roleId,
                 Title = title,
                 Category = string.IsNullOrWhiteSpace(category) ? null : category,
                 Description = string.IsNullOrWhiteSpace(description) ? null : description,
