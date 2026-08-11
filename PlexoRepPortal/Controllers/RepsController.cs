@@ -52,6 +52,12 @@ namespace PlexoRepPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<RepDto>> Create(RepCreateRequest request, CancellationToken cancellationToken)
         {
+            var emailInUse = await _db.Reps.AnyAsync(r => r.Email.ToLower() == request.Email.Trim().ToLower(), cancellationToken);
+            if (emailInUse)
+            {
+                return Conflict($"Email '{request.Email}' is already in use.");
+            }
+
             var now = DateTime.UtcNow;
             var rep = new Rep
             {
