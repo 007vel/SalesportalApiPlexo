@@ -35,6 +35,7 @@ namespace PlexoRepPortal.Controllers
             [FromForm] string? category,
             [FromForm] string? description,
             [FromForm] string? length,
+            [FromForm] string Language,
             CancellationToken cancellationToken)
         {
             if (file is null || file.Length == 0)
@@ -76,7 +77,8 @@ namespace PlexoRepPortal.Controllers
                 FilePath = filePath,
                 Length = fileType == "Video" && !string.IsNullOrWhiteSpace(length) ? length : null,
                 UploadedBy = string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase) ? UploadedByAdmin : UploadedByRep,
-                UploadedAt = DateTime.UtcNow
+                UploadedAt = DateTime.UtcNow,
+                Language =Language
             };
 
             _db.TrainingHubDocuments.Add(document);
@@ -165,8 +167,11 @@ namespace PlexoRepPortal.Controllers
                 contentType = "application/octet-stream";
             }
 
-            var bytes = await System.IO.File.ReadAllBytesAsync(document.FilePath, cancellationToken);
-            return File(bytes, contentType, document.FileName);
+            // enableRangeProcessing lets clients request byte ranges (206 Partial Content) instead of
+            // downloading the whole file up front — required for <video> to start playing/seeking before
+            // it has fully downloaded. No fileDownloadName, so Content-Disposition isn't forced to
+            // "attachment", letting the browser render the file inline.
+            return PhysicalFile(document.FilePath, contentType, enableRangeProcessing: true);
         }
 
         // DELETE api/traininghub/5

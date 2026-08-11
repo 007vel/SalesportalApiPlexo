@@ -14,6 +14,9 @@ namespace PlexoRepPortal.Models
         public string? GoogleLink { get; set; }
         public string? ResourceLink { get; set; }
         public RepStatus Status { get; set; }
+        public bool PassedCertification { get; set; }
+        public bool BusinessCardsSent { get; set; }
+        public bool ConsultantFeePaid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
@@ -34,9 +37,12 @@ namespace PlexoRepPortal.Models
             GoogleLink = rep.GoogleLink,
             ResourceLink = rep.ResourceLink,
             Status = rep.Status,
+            PassedCertification = rep.PassedCertification,
+            BusinessCardsSent = rep.BusinessCardsSent,
+            ConsultantFeePaid = rep.ConsultantFeePaid,
             CreatedAt = rep.CreatedAt,
             UpdatedAt = rep.UpdatedAt,
-            PortalLink = string.IsNullOrEmpty(domain) ? null : $"{domain}/{rep.RepId}"
+            PortalLink = string.IsNullOrEmpty(domain) ? null : $"{domain.TrimEnd('/')}/{rep.RepId}"
         };
     }
 }

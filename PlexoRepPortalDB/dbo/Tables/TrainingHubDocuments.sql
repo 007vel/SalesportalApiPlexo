@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[TrainingHubDocuments] (
     [Length]      NVARCHAR (50)  NULL,
     [UploadedBy]  NVARCHAR (10)  DEFAULT ('Rep') NOT NULL,
     [UploadedAt]  DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,
+    [Language] VARCHAR(50) NOT NULL DEFAULT ('English'), 
     PRIMARY KEY CLUSTERED ([OId] ASC)
 );
 

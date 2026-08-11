@@ -52,6 +52,12 @@ namespace PlexoRepPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<RepDto>> Create(RepCreateRequest request, CancellationToken cancellationToken)
         {
+            var emailInUse = await _db.Reps.AnyAsync(r => r.Email.ToLower() == request.Email.Trim().ToLower(), cancellationToken);
+            if (emailInUse)
+            {
+                return Conflict($"Email '{request.Email}' is already in use.");
+            }
+
             var now = DateTime.UtcNow;
             var rep = new Rep
             {
@@ -65,6 +71,9 @@ namespace PlexoRepPortal.Controllers
                 GoogleLink = request.GoogleLink,
                 ResourceLink = request.ResourceLink,
                 Status = request.Status,
+                PassedCertification = request.PassedCertification,
+                BusinessCardsSent = request.BusinessCardsSent,
+                ConsultantFeePaid = request.ConsultantFeePaid,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -178,6 +187,9 @@ namespace PlexoRepPortal.Controllers
             rep.GoogleLink = request.GoogleLink;
             rep.ResourceLink = request.ResourceLink;
             rep.Status = request.Status;
+            rep.PassedCertification = request.PassedCertification;
+            rep.BusinessCardsSent = request.BusinessCardsSent;
+            rep.ConsultantFeePaid = request.ConsultantFeePaid;
             rep.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
