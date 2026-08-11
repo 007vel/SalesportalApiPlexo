@@ -42,7 +42,7 @@ namespace PlexoRepPortal.Models
             ConsultantFeePaid = rep.ConsultantFeePaid,
             CreatedAt = rep.CreatedAt,
             UpdatedAt = rep.UpdatedAt,
-            PortalLink = string.IsNullOrEmpty(domain) ? null : $"{domain}/{rep.RepId}"
+            PortalLink = string.IsNullOrEmpty(domain) ? null : $"{domain.TrimEnd('/')}/{rep.RepId}"
         };
     }
 }

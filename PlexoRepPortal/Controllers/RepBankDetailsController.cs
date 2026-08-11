@@ -50,13 +50,13 @@ namespace PlexoRepPortal.Controllers
                 OId = existing.OId,
                 RepId = existing.RepId,
                 BankName = request.BankName,
-                MaskedRoutingNumber = Mask(request.RoutingNumber),
-                MaskedAccountNumber = Mask(request.AccountNumber),
+                RoutingNumber = request.RoutingNumber,
+                AccountNumber = request.AccountNumber,
                 UpdatedAt = existing.UpdatedAt
             });
         }
 
-        // GET api/repbankdetails/rep/1000 — bank name plus masked routing/account numbers, never the full decrypted numbers.
+        // GET api/repbankdetails/rep/1000 — bank name plus the full decrypted routing/account numbers.
         [HttpGet("rep/{repId}")]
         public async Task<ActionResult<RepBankDetailsDto>> GetByRep(string repId, CancellationToken cancellationToken)
         {
@@ -71,16 +71,10 @@ namespace PlexoRepPortal.Controllers
                 OId = record.OId,
                 RepId = record.RepId,
                 BankName = _encryption.Decrypt(record.BankName),
-                MaskedRoutingNumber = Mask(_encryption.Decrypt(record.RoutingNumber)),
-                MaskedAccountNumber = Mask(_encryption.Decrypt(record.AccountNumber)),
+                RoutingNumber = _encryption.Decrypt(record.RoutingNumber),
+                AccountNumber = _encryption.Decrypt(record.AccountNumber),
                 UpdatedAt = record.UpdatedAt
             });
-        }
-
-        private static string Mask(string accountNumber)
-        {
-            var lastFour = accountNumber.Length <= 4 ? accountNumber : accountNumber[^4..];
-            return $"****{lastFour}";
         }
     }
 }
