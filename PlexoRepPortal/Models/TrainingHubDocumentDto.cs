@@ -13,6 +13,8 @@ namespace PlexoRepPortal.Models
         public string UploadedBy { get; set; } = null!;
         public DateTime UploadedAt { get; set; }
 
+        public string Language { get; set; }
+
         public static TrainingHubDocumentDto FromEntity(TrainingHubDocument document) => new()
         {
             OId = document.OId,
@@ -24,7 +26,8 @@ namespace PlexoRepPortal.Models
             FileName = document.FileName,
             Length = document.Length,
             UploadedBy = document.UploadedBy,
-            UploadedAt = document.UploadedAt
+            UploadedAt = document.UploadedAt,
+            Language=document.Language,
         };
     }
 }

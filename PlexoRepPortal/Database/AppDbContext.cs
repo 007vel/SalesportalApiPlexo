@@ -73,6 +73,7 @@ namespace PlexoRepPortal.Database
                 entity.Property(d => d.Length).HasMaxLength(50);
                 entity.Property(d => d.UploadedBy).HasMaxLength(10).HasDefaultValue("Rep").IsRequired();
                 entity.Property(d => d.UploadedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(d => d.Language).HasDefaultValue("English");
 
                 entity.HasIndex(d => d.RoleId);
             });
