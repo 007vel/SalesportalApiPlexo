@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PlexoRepPortal.Database;
+using PlexoRepPortal.Services;
 
 namespace PlexoRepPortal
 {
@@ -17,6 +18,8 @@ namespace PlexoRepPortal
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+            builder.Services.AddSingleton<IEncryptionService, AesEncryptionService>();
 
             builder.Services.AddCors(options =>
             {

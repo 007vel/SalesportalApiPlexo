@@ -14,6 +14,9 @@ namespace PlexoRepPortal.Models
         public string? GoogleLink { get; set; }
         public string? ResourceLink { get; set; }
         public RepStatus Status { get; set; } = RepStatus.Pending;
+        public bool PassedCertification { get; set; }
+        public bool BusinessCardsSent { get; set; }
+        public bool ConsultantFeePaid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

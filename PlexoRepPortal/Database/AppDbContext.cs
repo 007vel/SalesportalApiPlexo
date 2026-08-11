@@ -12,6 +12,7 @@ namespace PlexoRepPortal.Database
         public virtual DbSet<Rep> Reps { get; set; } = null!;
         public virtual DbSet<RepDocument> RepDocuments { get; set; } = null!;
         public virtual DbSet<TrainingHubDocument> TrainingHubDocuments { get; set; } = null!;
+        public virtual DbSet<RepBankDetails> RepBankDetails { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,10 +33,36 @@ namespace PlexoRepPortal.Database
                 entity.Property(r => r.GoogleLink).HasMaxLength(500);
                 entity.Property(r => r.ResourceLink).HasMaxLength(500);
                 entity.Property(r => r.Status).HasConversion<byte>().HasDefaultValue(RepStatus.Pending);
+                entity.Property(r => r.PassedCertification).HasDefaultValue(false);
+                entity.Property(r => r.BusinessCardsSent).HasDefaultValue(false);
+                entity.Property(r => r.ConsultantFeePaid).HasDefaultValue(false);
                 entity.Property(r => r.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
                 entity.Property(r => r.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
 
                 entity.HasIndex(r => r.RepId).IsUnique();
+            });
+
+            modelBuilder.Entity<RepBankDetails>(entity =>
+            {
+                entity.ToTable("RepBankDetails");
+
+                entity.HasKey(b => b.OId);
+
+                entity.Property(b => b.RepId).HasMaxLength(30).IsRequired();
+                // Ciphertext (AES) — sized generously since encrypted output is longer than the plaintext it holds.
+                entity.Property(b => b.BankName).HasMaxLength(500).IsRequired();
+                entity.Property(b => b.RoutingNumber).HasMaxLength(500).IsRequired();
+                entity.Property(b => b.AccountNumber).HasMaxLength(500).IsRequired();
+                entity.Property(b => b.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(b => b.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+
+                entity.HasIndex(b => b.RepId).IsUnique();
+
+                entity.HasOne<Rep>()
+                    .WithMany()
+                    .HasForeignKey(b => b.RepId)
+                    .HasPrincipalKey(r => r.RepId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<RepDocument>(entity =>

@@ -71,6 +71,9 @@ namespace PlexoRepPortal.Controllers
                 GoogleLink = request.GoogleLink,
                 ResourceLink = request.ResourceLink,
                 Status = request.Status,
+                PassedCertification = request.PassedCertification,
+                BusinessCardsSent = request.BusinessCardsSent,
+                ConsultantFeePaid = request.ConsultantFeePaid,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -184,6 +187,9 @@ namespace PlexoRepPortal.Controllers
             rep.GoogleLink = request.GoogleLink;
             rep.ResourceLink = request.ResourceLink;
             rep.Status = request.Status;
+            rep.PassedCertification = request.PassedCertification;
+            rep.BusinessCardsSent = request.BusinessCardsSent;
+            rep.ConsultantFeePaid = request.ConsultantFeePaid;
             rep.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
