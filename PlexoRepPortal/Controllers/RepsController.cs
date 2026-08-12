@@ -155,6 +155,8 @@ namespace PlexoRepPortal.Controllers
 
             rep.GoogleLink = request.GoogleLink;
             rep.ResourceLink = request.ResourceLink;
+            rep.PricingSheetLink = request.PricingSheetLink;
+            rep.PowerPointLink = request.PowerPointLink;
             rep.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
