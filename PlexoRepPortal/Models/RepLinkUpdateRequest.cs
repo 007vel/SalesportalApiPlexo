@@ -12,5 +12,11 @@ namespace PlexoRepPortal.Models
 
         [MaxLength(500)]
         public string? ResourceLink { get; set; }
+
+        [MaxLength(500)]
+        public string? PricingSheetLink { get; set; }
+
+        [MaxLength(500)]
+        public string? PowerPointLink { get; set; }
     }
 }

@@ -32,6 +32,8 @@ namespace PlexoRepPortal.Database
                 entity.Property(r => r.Zip).HasMaxLength(20);
                 entity.Property(r => r.GoogleLink).HasMaxLength(500);
                 entity.Property(r => r.ResourceLink).HasMaxLength(500);
+                entity.Property(r => r.PricingSheetLink).HasMaxLength(500);
+                entity.Property(r => r.PowerPointLink).HasMaxLength(500);
                 entity.Property(r => r.Status).HasConversion<byte>().HasDefaultValue(RepStatus.Pending);
                 entity.Property(r => r.PassedCertification).HasDefaultValue(false);
                 entity.Property(r => r.BusinessCardsSent).HasDefaultValue(false);

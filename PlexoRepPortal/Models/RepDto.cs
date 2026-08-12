@@ -13,6 +13,8 @@ namespace PlexoRepPortal.Models
         public string? Zip { get; set; }
         public string? GoogleLink { get; set; }
         public string? ResourceLink { get; set; }
+        public string? PricingSheetLink { get; set; }
+        public string? PowerPointLink { get; set; }
         public RepStatus Status { get; set; }
         public bool PassedCertification { get; set; }
         public bool BusinessCardsSent { get; set; }
@@ -36,6 +38,8 @@ namespace PlexoRepPortal.Models
             Zip = rep.Zip,
             GoogleLink = rep.GoogleLink,
             ResourceLink = rep.ResourceLink,
+            PricingSheetLink = rep.PricingSheetLink,
+            PowerPointLink = rep.PowerPointLink,
             Status = rep.Status,
             PassedCertification = rep.PassedCertification,
             BusinessCardsSent = rep.BusinessCardsSent,

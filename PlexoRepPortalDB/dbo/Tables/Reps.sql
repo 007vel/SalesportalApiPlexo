@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[Reps] (
     [Zip]           NVARCHAR (20)  NULL,
     [GoogleLink]    NVARCHAR (500) NULL,
     [ResourceLink]  NVARCHAR (500) NULL,
+    [PricingSheetLink] NVARCHAR (500) NULL,
+    [PowerPointLink]   NVARCHAR (500) NULL,
     [Status]        TINYINT        DEFAULT ((1)) NOT NULL,
     [PassedCertification] BIT      DEFAULT ((0)) NOT NULL,
     [BusinessCardsSent]   BIT      DEFAULT ((0)) NOT NULL,
