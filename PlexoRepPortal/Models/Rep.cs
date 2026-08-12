@@ -13,6 +13,8 @@ namespace PlexoRepPortal.Models
         public string? Zip { get; set; }
         public string? GoogleLink { get; set; }
         public string? ResourceLink { get; set; }
+        public string? PricingSheetLink { get; set; }
+        public string? PowerPointLink { get; set; }
         public RepStatus Status { get; set; } = RepStatus.Pending;
         public bool PassedCertification { get; set; }
         public bool BusinessCardsSent { get; set; }

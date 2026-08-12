@@ -70,6 +70,8 @@ namespace PlexoRepPortal.Controllers
                 Zip = request.Zip,
                 GoogleLink = request.GoogleLink,
                 ResourceLink = request.ResourceLink,
+                PricingSheetLink = request.PricingSheetLink,
+                PowerPointLink = request.PowerPointLink,
                 Status = request.Status,
                 PassedCertification = request.PassedCertification,
                 BusinessCardsSent = request.BusinessCardsSent,
@@ -186,6 +188,8 @@ namespace PlexoRepPortal.Controllers
             rep.Zip = request.Zip;
             rep.GoogleLink = request.GoogleLink;
             rep.ResourceLink = request.ResourceLink;
+            rep.PricingSheetLink = request.PricingSheetLink;
+            rep.PowerPointLink = request.PowerPointLink;
             rep.Status = request.Status;
             rep.PassedCertification = request.PassedCertification;
             rep.BusinessCardsSent = request.BusinessCardsSent;
