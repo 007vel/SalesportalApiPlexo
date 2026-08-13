@@ -5,8 +5,10 @@ namespace PlexoRepPortal.Models
         public int OId { get; set; }
         public string RepId { get; set; } = null!;
         public string FullName { get; set; } = null!;
+        public string? BusinessName { get; set; }
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
+        public SalesRepType SalesRepType { get; set; } = SalesRepType.ReferralAgent;
         public string? Address { get; set; }
         public string? City { get; set; }
         public string? State { get; set; }
@@ -21,5 +23,16 @@ namespace PlexoRepPortal.Models
         public bool ConsultantFeePaid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public DeleteStatus Delete { get; set; } = DeleteStatus.NotDeleted;
+
+        // ----- admin-only fields, set after creation from the Rep Details page -----
+        public string? ContractWizardLink { get; set; }
+        public string? ContractWizardUsername { get; set; }
+        /// AES-encrypted ciphertext — see IEncryptionService. Never persisted or logged in plaintext.
+        public string? ContractWizardPassword { get; set; }
+        public string? ContractWizardInstructionsLink { get; set; }
+        public string? PwrRewardsEmail { get; set; }
+        /// AES-encrypted ciphertext — see IEncryptionService. Never persisted or logged in plaintext.
+        public string? PwrRewardsEmailPassword { get; set; }
     }
 }

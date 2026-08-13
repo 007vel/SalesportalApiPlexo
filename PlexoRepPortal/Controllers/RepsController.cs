@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlexoRepPortal.Database;
 using PlexoRepPortal.Models;
+using PlexoRepPortal.Services;
 
 namespace PlexoRepPortal.Controllers
 {
@@ -13,14 +14,19 @@ namespace PlexoRepPortal.Controllers
 
         private readonly AppDbContext _db;
         private readonly IConfiguration _configuration;
+        private readonly IEncryptionService _encryption;
 
-        public RepsController(AppDbContext db, IConfiguration configuration)
+        public RepsController(AppDbContext db, IConfiguration configuration, IEncryptionService encryption)
         {
             _db = db;
             _configuration = configuration;
+            _encryption = encryption;
         }
 
         private string? Domain => _configuration["AppSettings:DomainName"]?.Trim();
+
+        private string? Encrypt(string? plaintext) =>
+            string.IsNullOrEmpty(plaintext) ? null : _encryption.Encrypt(plaintext);
 
         // GET api/reps
         [HttpGet]
@@ -31,7 +37,7 @@ namespace PlexoRepPortal.Controllers
                 .OrderBy(r => r.OId)
                 .ToListAsync(cancellationToken);
 
-            return Ok(reps.Select(r => RepDto.FromEntity(r, Domain)));
+            return Ok(reps.Select(r => RepDto.FromEntity(r, Domain, _encryption)));
         }
 
         // GET api/reps/5
@@ -45,7 +51,7 @@ namespace PlexoRepPortal.Controllers
                 return NotFound();
             }
 
-            return Ok(RepDto.FromEntity(rep, Domain));
+            return Ok(RepDto.FromEntity(rep, Domain, _encryption));
         }
 
         // POST api/reps
@@ -62,8 +68,10 @@ namespace PlexoRepPortal.Controllers
             var rep = new Rep
             {
                 FullName = request.FullName,
+                BusinessName = request.BusinessName,
                 Email = request.Email,
                 Phone = request.Phone,
+                SalesRepType = request.SalesRepType,
                 Address = request.Address,
                 City = request.City,
                 State = request.State,
@@ -73,6 +81,7 @@ namespace PlexoRepPortal.Controllers
                 PricingSheetLink = request.PricingSheetLink,
                 PowerPointLink = request.PowerPointLink,
                 Status = request.Status,
+                Delete = request.Delete,
                 PassedCertification = request.PassedCertification,
                 BusinessCardsSent = request.BusinessCardsSent,
                 ConsultantFeePaid = request.ConsultantFeePaid,
@@ -98,7 +107,7 @@ namespace PlexoRepPortal.Controllers
                 }
             }
 
-            var dto = RepDto.FromEntity(rep, Domain);
+            var dto = RepDto.FromEntity(rep, Domain, _encryption);
             return CreatedAtAction(nameof(GetById), new { oId = rep.OId }, dto);
         }
 
@@ -140,7 +149,7 @@ namespace PlexoRepPortal.Controllers
                 return NotFound(new { IsValid = false, Message = "RepId not found." });
             }
 
-            return Ok(RepDto.FromEntity(rep, Domain));
+            return Ok(RepDto.FromEntity(rep, Domain, _encryption));
         }
 
         // POST api/reps/link
@@ -161,7 +170,7 @@ namespace PlexoRepPortal.Controllers
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return Ok(RepDto.FromEntity(rep, Domain));
+            return Ok(RepDto.FromEntity(rep, Domain, _encryption));
         }
 
         // PUT api/reps/5
@@ -182,8 +191,10 @@ namespace PlexoRepPortal.Controllers
 
             rep.RepId = request.RepId;
             rep.FullName = request.FullName;
+            rep.BusinessName = request.BusinessName;
             rep.Email = request.Email;
             rep.Phone = request.Phone;
+            rep.SalesRepType = request.SalesRepType;
             rep.Address = request.Address;
             rep.City = request.City;
             rep.State = request.State;
@@ -196,14 +207,23 @@ namespace PlexoRepPortal.Controllers
             rep.PassedCertification = request.PassedCertification;
             rep.BusinessCardsSent = request.BusinessCardsSent;
             rep.ConsultantFeePaid = request.ConsultantFeePaid;
+            rep.ContractWizardLink = request.ContractWizardLink;
+            rep.ContractWizardUsername = request.ContractWizardUsername;
+            rep.ContractWizardPassword = Encrypt(request.ContractWizardPassword);
+            rep.ContractWizardInstructionsLink = request.ContractWizardInstructionsLink;
+            rep.PwrRewardsEmail = request.PwrRewardsEmail;
+            rep.PwrRewardsEmailPassword = Encrypt(request.PwrRewardsEmailPassword);
             rep.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return Ok(RepDto.FromEntity(rep, Domain));
+            return Ok(RepDto.FromEntity(rep, Domain, _encryption));
         }
 
         // DELETE api/reps/5
+        // Soft delete — flips DeleteStatus rather than removing the row, so the rep's documents/bank
+        // details/commission history stay intact. The Rep entity's query filter then keeps it out of
+        // GetAll/GetById/ValidateRepId/Update automatically.
         [HttpDelete("{oId:int}")]
         public async Task<IActionResult> Delete(int oId, CancellationToken cancellationToken)
         {
@@ -213,7 +233,8 @@ namespace PlexoRepPortal.Controllers
                 return NotFound();
             }
 
-            _db.Reps.Remove(rep);
+            rep.Delete = DeleteStatus.Deleted;
+            rep.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync(cancellationToken);
 
             return NoContent();
