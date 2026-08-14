@@ -24,8 +24,10 @@ namespace PlexoRepPortal.Database
 
                 entity.Property(r => r.RepId).HasMaxLength(30).IsRequired();
                 entity.Property(r => r.FullName).HasMaxLength(200).IsRequired();
+                entity.Property(r => r.BusinessName).HasMaxLength(200);
                 entity.Property(r => r.Email).HasMaxLength(256).IsRequired();
                 entity.Property(r => r.Phone).HasMaxLength(30);
+                entity.Property(r => r.SalesRepType).HasConversion<byte>().HasDefaultValue(SalesRepType.ReferralAgent);
                 entity.Property(r => r.Address).HasMaxLength(300);
                 entity.Property(r => r.City).HasMaxLength(100);
                 entity.Property(r => r.State).HasMaxLength(50);
@@ -40,8 +42,30 @@ namespace PlexoRepPortal.Database
                 entity.Property(r => r.ConsultantFeePaid).HasDefaultValue(false);
                 entity.Property(r => r.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
                 entity.Property(r => r.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+                // Soft-delete flag — stored as a BIT (0/1), surfaced in code as DeleteStatus so callers
+                // can't accidentally treat it as a generic bool. Rows are never physically removed;
+                // RepsController's Delete endpoint just flips this instead (see DeleteStatus.cs).
+                // Deliberately NOT using .HasDefaultValue() here: EF Core treats a property whose
+                // current value equals the CLR default (NotDeleted/false) as "unset" and would omit
+                // it from the INSERT, letting the column's own SQL DEFAULT apply instead — since that
+                // default is 1 (Deleted), every API-created rep would otherwise come back invisible.
+                // Leaving ValueGenerated at its normal Never means every insert writes the real value.
+                entity.Property(r => r.Delete)
+                    .HasConversion(v => v == DeleteStatus.Deleted, v => v ? DeleteStatus.Deleted : DeleteStatus.NotDeleted);
+
+                entity.Property(r => r.ContractWizardLink).HasMaxLength(500);
+                entity.Property(r => r.ContractWizardUsername).HasMaxLength(200);
+                // Ciphertext (AES) — sized generously since encrypted output is longer than the plaintext it holds.
+                entity.Property(r => r.ContractWizardPassword).HasMaxLength(500);
+                entity.Property(r => r.ContractWizardInstructionsLink).HasMaxLength(500);
+                entity.Property(r => r.PwrRewardsEmail).HasMaxLength(256);
+                entity.Property(r => r.PwrRewardsEmailPassword).HasMaxLength(500);
 
                 entity.HasIndex(r => r.RepId).IsUnique();
+
+                // Soft-deleted reps stay invisible to every query against this DbSet (GetAll, GetById,
+                // Update, ValidateRepId, ...) without each caller needing to filter it out itself.
+                entity.HasQueryFilter(r => r.Delete == DeleteStatus.NotDeleted);
             });
 
             modelBuilder.Entity<RepBankDetails>(entity =>
