@@ -40,6 +40,39 @@ namespace PlexoRepPortal.Controllers
             return Ok(reps.Select(r => RepDto.FromEntity(r, Domain, _encryption)));
         }
 
+        // GET api/reps/filter?status=Active&salesRepType=ReferralAgent&search=jordan
+        // Every filter is optional and combines with AND. status/salesRepType bind from either the
+        // enum's name or its numeric value; search does a case-insensitive substring match on FullName.
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<RepDto>>> Filter(
+            [FromQuery] RepStatus? status,
+            [FromQuery] SalesRepType? salesRepType,
+            [FromQuery] string? search,
+            CancellationToken cancellationToken)
+        {
+            var query = _db.Reps.AsNoTracking().AsQueryable();
+
+            if (status.HasValue)
+            {
+                query = query.Where(r => r.Status == status.Value);
+            }
+
+            if (salesRepType.HasValue)
+            {
+                query = query.Where(r => r.SalesRepType == salesRepType.Value);
+            }
+
+            var trimmedSearch = search?.Trim();
+            if (!string.IsNullOrEmpty(trimmedSearch))
+            {
+                query = query.Where(r => r.FullName.Contains(trimmedSearch));
+            }
+
+            var reps = await query.OrderBy(r => r.OId).ToListAsync(cancellationToken);
+
+            return Ok(reps.Select(r => RepDto.FromEntity(r, Domain, _encryption)));
+        }
+
         // GET api/reps/5
         [HttpGet("{oId:int}")]
         public async Task<ActionResult<RepDto>> GetById(int oId, CancellationToken cancellationToken)
