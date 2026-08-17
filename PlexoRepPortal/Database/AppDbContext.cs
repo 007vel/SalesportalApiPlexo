@@ -13,6 +13,7 @@ namespace PlexoRepPortal.Database
         public virtual DbSet<RepDocument> RepDocuments { get; set; } = null!;
         public virtual DbSet<TrainingHubDocument> TrainingHubDocuments { get; set; } = null!;
         public virtual DbSet<RepBankDetails> RepBankDetails { get; set; } = null!;
+        public virtual DbSet<TrainingHubLink> TrainingHubLinks { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -129,6 +130,20 @@ namespace PlexoRepPortal.Database
                 entity.Property(d => d.Language).HasDefaultValue("English");
 
                 entity.HasIndex(d => d.RoleId);
+            });
+
+            modelBuilder.Entity<TrainingHubLink>(entity =>
+            {
+                entity.ToTable("TrainingHubLinks");
+
+                entity.HasKey(l => l.OId);
+
+                entity.Property(l => l.ProductVideoEnglishLink).HasMaxLength(500);
+                entity.Property(l => l.ProductVideoSpanishLink).HasMaxLength(500);
+                entity.Property(l => l.DashboardVideoEnglishLink).HasMaxLength(500);
+                entity.Property(l => l.DashboardVideoSpanishLink).HasMaxLength(500);
+                entity.Property(l => l.KnowledgeBaseLink).HasMaxLength(500);
+                entity.Property(l => l.SalesLeadLink).HasMaxLength(500);
             });
         }
     }
