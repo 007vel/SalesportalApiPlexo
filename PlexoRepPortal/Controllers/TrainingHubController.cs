@@ -54,12 +54,15 @@ namespace PlexoRepPortal.Controllers
                 return BadRequest($"UploadedBy must be '{UploadedByRep}' or '{UploadedByAdmin}'.");
             }
 
-            Directory.CreateDirectory(StorageRoot);
+            var isAdminUpload = string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase);
+            var folderName = isAdminUpload ? UploadedByAdmin : SanitizeFolderName(roleId);
+            var storageFolder = Path.Combine(StorageRoot, folderName);
+            Directory.CreateDirectory(storageFolder);
 
             var originalFileName = Path.GetFileName(file.FileName);
             var fileType = ResolveFileType(originalFileName);
             var storedFileName = $"{Guid.NewGuid()}{Path.GetExtension(originalFileName)}";
-            var filePath = Path.Combine(StorageRoot, storedFileName);
+            var filePath = Path.Combine(storageFolder, storedFileName);
 
             await using (var stream = System.IO.File.Create(filePath))
             {
@@ -193,6 +196,18 @@ namespace PlexoRepPortal.Controllers
             }
 
             return NoContent();
+        }
+
+        private static string SanitizeFolderName(string? repId)
+        {
+            if (string.IsNullOrWhiteSpace(repId))
+            {
+                return "Unknown";
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sanitized = new string(repId.Trim().Where(c => !invalidChars.Contains(c)).ToArray());
+            return sanitized.Length == 0 ? "Unknown" : sanitized;
         }
 
         private static string ResolveFileType(string fileName)

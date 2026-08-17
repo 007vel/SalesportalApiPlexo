@@ -6,9 +6,9 @@ namespace PlexoRepPortal.Models
     {
         public int OId { get; set; }
         public string RepId { get; set; } = null!;
-        public string BankName { get; set; } = null!;
-        public string RoutingNumber { get; set; } = null!;
-        public string AccountNumber { get; set; } = null!;
+        public string? BankName { get; set; } = null!;
+        public string? RoutingNumber { get; set; } = null!;
+        public string? AccountNumber { get; set; } = null!;
         public DateTime UpdatedAt { get; set; }
     }
 }

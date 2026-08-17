@@ -7,13 +7,13 @@ namespace PlexoRepPortal.Models
         [Required, MaxLength(30)]
         public string RepId { get; set; } = null!;
 
-        [Required, MaxLength(200)]
-        public string BankName { get; set; } = null!;
+        [MaxLength(200)]
+        public string? BankName { get; set; } = null!;
 
-        [Required, MaxLength(50)]
-        public string RoutingNumber { get; set; } = null!;
+        [MaxLength(50)]
+        public string? RoutingNumber { get; set; } = null!;
 
-        [Required, MaxLength(50)]
-        public string AccountNumber { get; set; } = null!;
+        [MaxLength(50)]
+        public string? AccountNumber { get; set; } = null!;
     }
 }
