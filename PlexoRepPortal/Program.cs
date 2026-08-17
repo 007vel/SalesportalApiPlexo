@@ -20,6 +20,7 @@ namespace PlexoRepPortal
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddSingleton<IEncryptionService, AesEncryptionService>();
+            builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
 
             builder.Services.AddCors(options =>
             {
