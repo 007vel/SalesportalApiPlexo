@@ -116,7 +116,7 @@ namespace PlexoRepPortal.Controllers
                 Status = request.Status,
                 Delete = request.Delete,
                 PassedCertification = request.PassedCertification,
-                BusinessCardsSent = request.BusinessCardsSent,
+                BusinessCardStatus = request.BusinessCardStatus,
                 ConsultantFeePaid = request.ConsultantFeePaid,
                 CreatedAt = now,
                 UpdatedAt = now
@@ -238,7 +238,7 @@ namespace PlexoRepPortal.Controllers
             rep.PowerPointLink = request.PowerPointLink;
             rep.Status = request.Status;
             rep.PassedCertification = request.PassedCertification;
-            rep.BusinessCardsSent = request.BusinessCardsSent;
+            rep.BusinessCardStatus = request.BusinessCardStatus;
             rep.ConsultantFeePaid = request.ConsultantFeePaid;
             rep.ContractWizardLink = request.ContractWizardLink;
             rep.ContractWizardUsername = request.ContractWizardUsername;

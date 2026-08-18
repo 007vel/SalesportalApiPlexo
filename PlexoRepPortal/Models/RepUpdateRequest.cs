@@ -48,7 +48,7 @@ namespace PlexoRepPortal.Models
         public RepStatus Status { get; set; }
 
         public bool PassedCertification { get; set; }
-        public bool BusinessCardsSent { get; set; }
+        public BusinessCardStatus BusinessCardStatus { get; set; }
         public bool ConsultantFeePaid { get; set; }
 
         // ----- admin-only fields, set after creation from the Rep Details page -----

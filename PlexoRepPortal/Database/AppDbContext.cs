@@ -39,7 +39,7 @@ namespace PlexoRepPortal.Database
                 entity.Property(r => r.PowerPointLink).HasMaxLength(500);
                 entity.Property(r => r.Status).HasConversion<byte>().HasDefaultValue(RepStatus.Pending);
                 entity.Property(r => r.PassedCertification).HasDefaultValue(false);
-                entity.Property(r => r.BusinessCardsSent).HasDefaultValue(false);
+                entity.Property(r => r.BusinessCardStatus).HasConversion<byte>().HasDefaultValue(BusinessCardStatus.NotSent);
                 entity.Property(r => r.ConsultantFeePaid).HasDefaultValue(false);
                 entity.Property(r => r.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
                 entity.Property(r => r.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
@@ -128,8 +128,10 @@ namespace PlexoRepPortal.Database
                 entity.Property(d => d.UploadedBy).HasMaxLength(10).HasDefaultValue("Rep").IsRequired();
                 entity.Property(d => d.UploadedAt).HasDefaultValueSql("SYSUTCDATETIME()");
                 entity.Property(d => d.Language).HasDefaultValue("English");
+                entity.Property(d => d.HubType).HasMaxLength(20).HasDefaultValue("Training").IsRequired();
 
                 entity.HasIndex(d => d.RoleId);
+                entity.HasIndex(d => d.HubType);
             });
 
             modelBuilder.Entity<TrainingHubLink>(entity =>
