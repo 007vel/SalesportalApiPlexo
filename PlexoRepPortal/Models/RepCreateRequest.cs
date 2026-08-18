@@ -46,7 +46,7 @@ namespace PlexoRepPortal.Models
 
         public DeleteStatus Delete { get; set; }
         public bool PassedCertification { get; set; }
-        public bool BusinessCardsSent { get; set; }
+        public BusinessCardStatus BusinessCardStatus { get; set; } = BusinessCardStatus.NotSent;
         public bool ConsultantFeePaid { get; set; }
     }
 }

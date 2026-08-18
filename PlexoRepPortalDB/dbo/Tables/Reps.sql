@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[Reps] (
     [PowerPointLink]   NVARCHAR (500) NULL,
     [Status]        TINYINT        DEFAULT ((1)) NOT NULL,
     [PassedCertification] BIT      DEFAULT ((0)) NOT NULL,
-    [BusinessCardsSent]   BIT      DEFAULT ((0)) NOT NULL,
+    [BusinessCardStatus]  TINYINT  DEFAULT ((0)) NOT NULL,
     [ConsultantFeePaid]   BIT      DEFAULT ((0)) NOT NULL,
     [CreatedAt]     DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,
     [UpdatedAt]     DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,

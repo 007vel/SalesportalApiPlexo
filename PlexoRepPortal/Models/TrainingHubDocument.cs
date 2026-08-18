@@ -14,5 +14,6 @@ namespace PlexoRepPortal.Models
         public string UploadedBy { get; set; } = null!;
         public DateTime UploadedAt { get; set; }
         public string Language { get; set; }
+        public string HubType { get; set; } = "Training";
     }
 }

@@ -10,7 +10,8 @@ CREATE TABLE [dbo].[TrainingHubDocuments] (
     [Length]      NVARCHAR (50)  NULL,
     [UploadedBy]  NVARCHAR (10)  DEFAULT ('Rep') NOT NULL,
     [UploadedAt]  DATETIME2 (7)  DEFAULT (sysutcdatetime()) NOT NULL,
-    [Language] VARCHAR(50) NOT NULL DEFAULT ('English'), 
+    [Language] VARCHAR(50) NOT NULL DEFAULT ('English'),
+    [HubType]     NVARCHAR (20)  NOT NULL DEFAULT ('Training'),
     PRIMARY KEY CLUSTERED ([OId] ASC)
 );
 
@@ -18,3 +19,6 @@ CREATE TABLE [dbo].[TrainingHubDocuments] (
 GO
 CREATE NONCLUSTERED INDEX [IX_TrainingHubDocuments_RoleId]
     ON [dbo].[TrainingHubDocuments]([RoleId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_TrainingHubDocuments_HubType]
+    ON [dbo].[TrainingHubDocuments]([HubType] ASC);

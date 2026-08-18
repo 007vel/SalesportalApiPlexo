@@ -14,6 +14,7 @@ namespace PlexoRepPortal.Models
         public DateTime UploadedAt { get; set; }
 
         public string Language { get; set; }
+        public string HubType { get; set; } = null!;
 
         public static TrainingHubDocumentDto FromEntity(TrainingHubDocument document) => new()
         {
@@ -28,6 +29,7 @@ namespace PlexoRepPortal.Models
             UploadedBy = document.UploadedBy,
             UploadedAt = document.UploadedAt,
             Language=document.Language,
+            HubType = document.HubType,
         };
     }
 }

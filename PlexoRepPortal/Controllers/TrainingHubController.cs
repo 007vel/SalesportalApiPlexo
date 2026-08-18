@@ -13,6 +13,7 @@ namespace PlexoRepPortal.Controllers
         private const string StorageRoot = @"C:\pwr_docs\TrainingHub";
         private const string UploadedByAdmin = "Admin";
         private const string UploadedByRep = "Rep";
+        private const string DefaultHubType = "Training";
 
         private static readonly string[] VideoExtensions = { ".mp4", ".mov", ".avi", ".webm", ".mkv", ".m4v" };
         private static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp" };
@@ -36,6 +37,7 @@ namespace PlexoRepPortal.Controllers
             [FromForm] string? description,
             [FromForm] string? length,
             [FromForm] string Language,
+            [FromForm] string? hubType,
             CancellationToken cancellationToken)
         {
             if (file is null || file.Length == 0)
@@ -52,6 +54,13 @@ namespace PlexoRepPortal.Controllers
                 && !string.Equals(uploadedBy, UploadedByRep, StringComparison.OrdinalIgnoreCase))
             {
                 return BadRequest($"UploadedBy must be '{UploadedByRep}' or '{UploadedByAdmin}'.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(hubType)
+                && !string.Equals(hubType, "Training", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(hubType, "Marketing", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("HubType must be 'Training' or 'Marketing'.");
             }
 
             var isAdminUpload = string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase);
@@ -81,7 +90,8 @@ namespace PlexoRepPortal.Controllers
                 Length = fileType == "Video" && !string.IsNullOrWhiteSpace(length) ? length : null,
                 UploadedBy = string.Equals(uploadedBy, UploadedByAdmin, StringComparison.OrdinalIgnoreCase) ? UploadedByAdmin : UploadedByRep,
                 UploadedAt = DateTime.UtcNow,
-                Language =Language
+                Language =Language,
+                HubType = NormalizeHubType(hubType),
             };
 
             _db.TrainingHubDocuments.Add(document);
@@ -90,12 +100,15 @@ namespace PlexoRepPortal.Controllers
             return CreatedAtAction(nameof(Get), new { oId = document.OId }, TrainingHubDocumentDto.FromEntity(document));
         }
 
-        // GET api/traininghub
+        // GET api/traininghub?hubType=Marketing
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TrainingHubDocumentDto>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<TrainingHubDocumentDto>>> GetAll([FromQuery] string? hubType, CancellationToken cancellationToken)
         {
+            var resolvedHubType = NormalizeHubType(hubType);
+
             var documents = await _db.TrainingHubDocuments
                 .AsNoTracking()
+                .Where(d => d.HubType == resolvedHubType)
                 .OrderByDescending(d => d.UploadedAt)
                 .ToListAsync(cancellationToken);
 
@@ -177,6 +190,74 @@ namespace PlexoRepPortal.Controllers
             return PhysicalFile(document.FilePath, contentType, enableRangeProcessing: true);
         }
 
+        // PUT api/traininghub/5
+        // Edits a document's metadata, and optionally swaps its file. RoleId/UploadedBy/HubType are
+        // ownership/identity fields set at creation and are never changed here.
+        [HttpPut("{oId:int}")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<TrainingHubDocumentDto>> Update(
+            int oId,
+            [FromForm] string title,
+            [FromForm] string? category,
+            [FromForm] string? description,
+            [FromForm] string? length,
+            [FromForm] string Language,
+            [FromForm] IFormFile? file,
+            CancellationToken cancellationToken)
+        {
+            var document = await _db.TrainingHubDocuments.FirstOrDefaultAsync(d => d.OId == oId, cancellationToken);
+            if (document is null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return BadRequest("Title is required.");
+            }
+
+            string? oldFilePath = null;
+            if (file is not null && file.Length > 0)
+            {
+                var isAdminUpload = document.UploadedBy == UploadedByAdmin;
+                var folderName = isAdminUpload ? UploadedByAdmin : SanitizeFolderName(document.RoleId);
+                var storageFolder = Path.Combine(StorageRoot, folderName);
+                Directory.CreateDirectory(storageFolder);
+
+                var originalFileName = Path.GetFileName(file.FileName);
+                var storedFileName = $"{Guid.NewGuid()}{Path.GetExtension(originalFileName)}";
+                var newFilePath = Path.Combine(storageFolder, storedFileName);
+
+                await using (var stream = System.IO.File.Create(newFilePath))
+                {
+                    await file.CopyToAsync(stream, cancellationToken);
+                }
+
+                oldFilePath = document.FilePath;
+                document.FileName = originalFileName;
+                document.FilePath = newFilePath;
+                document.FileType = ResolveFileType(originalFileName);
+            }
+
+            document.Title = title;
+            document.Category = string.IsNullOrWhiteSpace(category) ? null : category;
+            document.Description = string.IsNullOrWhiteSpace(description) ? null : description;
+            document.Language = Language;
+            document.Length = document.FileType == "Video" && !string.IsNullOrWhiteSpace(length) ? length : null;
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // The old file is only deleted once the DB write has committed successfully, so a
+            // mid-request failure never leaves the row pointing at a file that's already gone —
+            // the opposite ordering from Delete, where the row is always what's being removed.
+            if (oldFilePath is not null && System.IO.File.Exists(oldFilePath))
+            {
+                System.IO.File.Delete(oldFilePath);
+            }
+
+            return Ok(TrainingHubDocumentDto.FromEntity(document));
+        }
+
         // DELETE api/traininghub/5
         [HttpDelete("{oId:int}")]
         public async Task<IActionResult> Delete(int oId, CancellationToken cancellationToken)
@@ -217,6 +298,12 @@ namespace PlexoRepPortal.Controllers
             if (ImageExtensions.Contains(extension)) return "Image";
             if (extension == ".pdf") return "Pdf";
             return "Document";
+        }
+
+        // Canonicalizes a caller-supplied hub type to the exact casing stored in the database, defaulting to Training when omitted.
+        private static string NormalizeHubType(string? hubType)
+        {
+            return string.Equals(hubType, "Marketing", StringComparison.OrdinalIgnoreCase) ? "Marketing" : DefaultHubType;
         }
     }
 }

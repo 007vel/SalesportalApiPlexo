@@ -21,7 +21,7 @@ namespace PlexoRepPortal.Models
         public string? PowerPointLink { get; set; }
         public RepStatus Status { get; set; }
         public bool PassedCertification { get; set; }
-        public bool BusinessCardsSent { get; set; }
+        public BusinessCardStatus BusinessCardStatus { get; set; }
         public bool ConsultantFeePaid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -60,7 +60,7 @@ namespace PlexoRepPortal.Models
             PowerPointLink = rep.PowerPointLink,
             Status = rep.Status,
             PassedCertification = rep.PassedCertification,
-            BusinessCardsSent = rep.BusinessCardsSent,
+            BusinessCardStatus = rep.BusinessCardStatus,
             ConsultantFeePaid = rep.ConsultantFeePaid,
             CreatedAt = rep.CreatedAt,
             UpdatedAt = rep.UpdatedAt,
