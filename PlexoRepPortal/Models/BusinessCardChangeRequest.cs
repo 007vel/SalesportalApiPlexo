@@ -2,15 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PlexoRepPortal.Models
 {
-    public class ContactAdminRequest
+    public class BusinessCardChangeRequest
     {
-        [Required, MaxLength(200)]
-        public string Name { get; set; } = null!;
+        [Required, MaxLength(30)]
+        public string RepId { get; set; } = null!;
 
         [Required, EmailAddress, MaxLength(256)]
         public string Email { get; set; } = null!;
 
         [Required, MaxLength(4000)]
-        public string Message { get; set; } = null!;
+        public string Notes { get; set; } = null!;
     }
 }
