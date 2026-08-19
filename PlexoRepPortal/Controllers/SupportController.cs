@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using PlexoCommon.Email;
 using PlexoRepPortal.Models;
-using PlexoRepPortal.Services;
 
 namespace PlexoRepPortal.Controllers
 {
