@@ -148,7 +148,11 @@ namespace PlexoRepPortal.Controllers
         // carries the domain-prefixed "plexopro.com/1000" form for display/copy purposes.
         private async Task<string> GenerateNextRepIdAsync(CancellationToken cancellationToken)
         {
+            // IgnoreQueryFilters: deleting a rep is a soft delete (the row stays in the table), but
+            // the unique index on RepId still enforces uniqueness against those rows — so the scan
+            // has to see them too, or it'll happily hand out a RepId that's already taken.
             var existingRepIds = await _db.Reps
+                .IgnoreQueryFilters()
                 .Select(r => r.RepId)
                 .ToListAsync(cancellationToken);
 
@@ -216,7 +220,9 @@ namespace PlexoRepPortal.Controllers
                 return NotFound();
             }
 
-            var repIdInUse = await _db.Reps.AnyAsync(r => r.RepId == request.RepId && r.OId != oId, cancellationToken);
+            // IgnoreQueryFilters: same reasoning as GenerateNextRepIdAsync — the unique index on RepId
+            // still enforces uniqueness against soft-deleted rows, so this check has to see them too.
+            var repIdInUse = await _db.Reps.IgnoreQueryFilters().AnyAsync(r => r.RepId == request.RepId && r.OId != oId, cancellationToken);
             if (repIdInUse)
             {
                 return Conflict($"RepId '{request.RepId}' is already in use.");
