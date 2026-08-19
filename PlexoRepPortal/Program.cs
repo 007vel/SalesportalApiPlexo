@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PlexoCommon.Email;
 using PlexoRepPortal.Database;
 using PlexoRepPortal.Services;
 
@@ -20,7 +21,10 @@ namespace PlexoRepPortal
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddSingleton<IEncryptionService, AesEncryptionService>();
-            builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
+            builder.Services.AddHttpClient<IEmailService, MailgunEmailService>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.mailgun.net/");
+            });
 
             builder.Services.AddCors(options =>
             {

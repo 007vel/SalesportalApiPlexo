@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PlexoCommon.Email;
+using PlexoCommon.Email.Templates;
 using PlexoRepPortal.Database;
 using PlexoRepPortal.Models;
 using PlexoRepPortal.Services;
@@ -15,15 +17,23 @@ namespace PlexoRepPortal.Controllers
         private readonly AppDbContext _db;
         private readonly IConfiguration _configuration;
         private readonly IEncryptionService _encryption;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<RepsController> _logger;
 
-        public RepsController(AppDbContext db, IConfiguration configuration, IEncryptionService encryption)
+        public RepsController(AppDbContext db, IConfiguration configuration, IEncryptionService encryption,
+            IEmailService emailService, ILogger<RepsController> logger)
         {
             _db = db;
             _configuration = configuration;
             _encryption = encryption;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         private string? Domain => _configuration["AppSettings:DomainName"]?.Trim();
+
+        private string? BuildPortalLink(string repId) =>
+            string.IsNullOrEmpty(Domain) ? null : $"{Domain!.TrimEnd('/')}/{repId}";
 
         private string? Encrypt(string? plaintext) =>
             string.IsNullOrEmpty(plaintext) ? null : _encryption.Encrypt(plaintext);
@@ -138,6 +148,17 @@ namespace PlexoRepPortal.Controllers
                     // RepId was taken by a concurrent request; detach and retry with the next number.
                     _db.Entry(rep).State = EntityState.Detached;
                 }
+            }
+
+            try
+            {
+                var loginLink = BuildPortalLink(rep.RepId);
+                var (subject, html) = RepWelcomeEmailTemplate.Build(rep.FullName, rep.Email, rep.RepId, loginLink);
+                await _emailService.SendAsync(rep.Email, from: null, subject, html, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send Rep welcome email to {Email} for RepId {RepId}", rep.Email, rep.RepId);
             }
 
             var dto = RepDto.FromEntity(rep, Domain, _encryption);

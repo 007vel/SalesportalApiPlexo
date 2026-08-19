@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using PlexoCommon.Email;
 
 namespace PlexoRepPortal.Services
 {
@@ -13,7 +14,7 @@ namespace PlexoRepPortal.Services
             _configuration = configuration;
         }
 
-        public async Task SendAsync(string to, string from, string subject, string body, CancellationToken cancellationToken = default)
+        public async Task SendAsync(string to, string? from, string subject, string body, CancellationToken cancellationToken = default)
         {
             var host = _configuration["Smtp:Host"];
             if (string.IsNullOrWhiteSpace(host))

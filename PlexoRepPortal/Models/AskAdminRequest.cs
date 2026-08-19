@@ -2,11 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PlexoRepPortal.Models
 {
-    public class ContactAdminRequest
+    public class AskAdminRequest
     {
-        [Required, MaxLength(200)]
-        public string Name { get; set; } = null!;
-
         [Required, EmailAddress, MaxLength(256)]
         public string Email { get; set; } = null!;
 
