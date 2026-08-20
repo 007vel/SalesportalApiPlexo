@@ -155,6 +155,8 @@ namespace PlexoRepPortal.Controllers
                 var loginLink = BuildPortalLink(rep.RepId);
                 var (subject, html) = RepWelcomeEmailTemplate.Build(rep.FullName, rep.Email, rep.RepId, loginLink);
                 await _emailService.SendAsync(rep.Email, from: null, subject, html, cancellationToken);
+                rep.WelcomeEmailSentAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {

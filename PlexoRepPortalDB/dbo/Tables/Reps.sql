@@ -27,6 +27,7 @@ CREATE TABLE [dbo].[Reps] (
     [ContractWizardInstructionsLink] NVARCHAR (500) NULL,
     [PwrRewardsEmail]                NVARCHAR (256) NULL,
     [PwrRewardsEmailPassword]        NVARCHAR (500) NULL,
+    [WelcomeEmailSentAt]             DATETIME2 (7)  NULL,
     PRIMARY KEY CLUSTERED ([OId] ASC)
 );
 
