@@ -71,6 +71,7 @@
     <Build Include="dbo\Tables\TrainingHubDocuments.sql" />
     <Build Include="dbo\Tables\RepBankDetails.sql" />
     <Build Include="dbo\Tables\TrainingHubLinks.sql" />
+    <Build Include="dbo\Tables\RepNotes.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="dbo\Scripts\Post-Deployment.sql" />

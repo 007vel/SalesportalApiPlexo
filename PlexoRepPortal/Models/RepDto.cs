@@ -29,6 +29,9 @@ namespace PlexoRepPortal.Models
         /// Ready-to-copy portal link, e.g. "plexopro.com/1000" — RepId itself always stays the plain number so rep login/lookup keeps matching on it.
         public string? PortalLink { get; set; }
 
+        /// Null unless the Rep welcome email actually sent successfully — see RepsController.Create.
+        public DateTime? WelcomeEmailSentAt { get; set; }
+
         // ----- admin-only fields, set after creation from the Rep Details page -----
         public string? ContractWizardLink { get; set; }
         public string? ContractWizardUsername { get; set; }
@@ -65,6 +68,7 @@ namespace PlexoRepPortal.Models
             CreatedAt = rep.CreatedAt,
             UpdatedAt = rep.UpdatedAt,
             PortalLink = string.IsNullOrEmpty(domain) ? null : $"{domain.TrimEnd('/')}/{rep.RepId}",
+            WelcomeEmailSentAt = rep.WelcomeEmailSentAt,
             ContractWizardLink = rep.ContractWizardLink,
             ContractWizardUsername = rep.ContractWizardUsername,
             ContractWizardPassword = Decrypt(rep.ContractWizardPassword, encryption),

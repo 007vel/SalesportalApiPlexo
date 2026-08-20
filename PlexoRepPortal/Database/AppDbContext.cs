@@ -14,6 +14,7 @@ namespace PlexoRepPortal.Database
         public virtual DbSet<TrainingHubDocument> TrainingHubDocuments { get; set; } = null!;
         public virtual DbSet<RepBankDetails> RepBankDetails { get; set; } = null!;
         public virtual DbSet<TrainingHubLink> TrainingHubLinks { get; set; } = null!;
+        public virtual DbSet<RepNote> RepNotes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -146,6 +147,26 @@ namespace PlexoRepPortal.Database
                 entity.Property(l => l.DashboardVideoSpanishLink).HasMaxLength(500);
                 entity.Property(l => l.KnowledgeBaseLink).HasMaxLength(500);
                 entity.Property(l => l.SalesLeadLink).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<RepNote>(entity =>
+            {
+                entity.ToTable("RepNotes");
+
+                entity.HasKey(n => n.OId);
+
+                entity.Property(n => n.RepId).HasMaxLength(30).IsRequired();
+                entity.Property(n => n.Kind).HasMaxLength(20).IsRequired();
+                entity.Property(n => n.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+                entity.Property(n => n.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+
+                entity.HasIndex(n => new { n.RepId, n.Kind }).IsUnique();
+
+                entity.HasOne<Rep>()
+                    .WithMany()
+                    .HasForeignKey(n => n.RepId)
+                    .HasPrincipalKey(r => r.RepId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

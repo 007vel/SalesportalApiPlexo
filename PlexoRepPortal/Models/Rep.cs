@@ -25,6 +25,10 @@ namespace PlexoRepPortal.Models
         public DateTime UpdatedAt { get; set; }
         public DeleteStatus Delete { get; set; } = DeleteStatus.NotDeleted;
 
+        /// Set when the Rep welcome email (sent on creation) actually goes out successfully;
+        /// stays null if it was never attempted or Mailgun failed — see RepsController.Create.
+        public DateTime? WelcomeEmailSentAt { get; set; }
+
         // ----- admin-only fields, set after creation from the Rep Details page -----
         public string? ContractWizardLink { get; set; }
         public string? ContractWizardUsername { get; set; }

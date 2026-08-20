@@ -4,7 +4,7 @@ using PlexoCommon.Email;
 
 namespace PlexoRepPortal.Services
 {
-    /// Sends plain-text email via SMTP using settings from the "Smtp" config section.
+    /// Sends HTML email via SMTP using settings from the "Smtp" config section.
     public class SmtpEmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
@@ -21,9 +21,13 @@ namespace PlexoRepPortal.Services
             {
                 throw new InvalidOperationException("Smtp:Host must be configured.");
             }
-            if (string.IsNullOrWhiteSpace(from))
+
+            // Callers that don't need a specific From (e.g. the rep welcome email) pass null and
+            // rely on the configured default instead.
+            var fromAddress = string.IsNullOrWhiteSpace(from) ? _configuration["Smtp:FromAddress"] : from;
+            if (string.IsNullOrWhiteSpace(fromAddress))
             {
-                throw new ArgumentException("A From address is required.", nameof(from));
+                throw new InvalidOperationException("A From address is required — pass one explicitly or configure Smtp:FromAddress.");
             }
 
             var port = int.TryParse(_configuration["Smtp:Port"], out var parsedPort) ? parsedPort : 587;
@@ -37,7 +41,15 @@ namespace PlexoRepPortal.Services
                 client.Credentials = new NetworkCredential(user, password);
             }
 
-            using var message = new MailMessage(from, to, subject, body);
+            using var message = new MailMessage
+            {
+                From = new MailAddress(fromAddress, string.IsNullOrWhiteSpace(from) ? _configuration["Smtp:FromName"] : null),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true,
+            };
+            message.To.Add(to);
+
             await client.SendMailAsync(message, cancellationToken);
         }
     }
