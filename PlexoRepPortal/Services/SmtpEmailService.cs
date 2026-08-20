@@ -14,7 +14,7 @@ namespace PlexoRepPortal.Services
             _configuration = configuration;
         }
 
-        public async Task SendAsync(string to, string? from, string subject, string body, CancellationToken cancellationToken = default)
+        public async Task SendAsync(string to, string? usersContactEmail, string subject, string body, CancellationToken cancellationToken = default)
         {
             var host = _configuration["Smtp:Host"];
             if (string.IsNullOrWhiteSpace(host))
@@ -24,7 +24,7 @@ namespace PlexoRepPortal.Services
 
             // Callers that don't need a specific From (e.g. the rep welcome email) pass null and
             // rely on the configured default instead.
-            var fromAddress = string.IsNullOrWhiteSpace(from) ? _configuration["Smtp:FromAddress"] : from;
+            var fromAddress = string.IsNullOrWhiteSpace(usersContactEmail) ? _configuration["Smtp:FromAddress"] : usersContactEmail;
             if (string.IsNullOrWhiteSpace(fromAddress))
             {
                 throw new InvalidOperationException("A From address is required — pass one explicitly or configure Smtp:FromAddress.");
@@ -43,14 +43,14 @@ namespace PlexoRepPortal.Services
 
             using var message = new MailMessage
             {
-                From = new MailAddress(fromAddress, string.IsNullOrWhiteSpace(from) ? _configuration["Smtp:FromName"] : null),
+                From = new MailAddress(_configuration["Smtp:FromAddress"], string.IsNullOrWhiteSpace(usersContactEmail) ? _configuration["Smtp:FromName"] : null),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true,
             };
             message.To.Add(to);
 
-            await client.SendMailAsync(message, cancellationToken);
+             await client.SendMailAsync(message, cancellationToken);
         }
     }
 }
