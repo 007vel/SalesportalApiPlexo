@@ -21,10 +21,7 @@ namespace PlexoRepPortal
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddSingleton<IEncryptionService, AesEncryptionService>();
-            builder.Services.AddHttpClient<IEmailService, MailgunEmailService>(client =>
-            {
-                client.BaseAddress = new Uri("https://api.mailgun.net/");
-            });
+            builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
 
             builder.Services.AddCors(options =>
             {
