@@ -29,7 +29,7 @@ namespace PlexoRepPortal.Models
         /// Ready-to-copy portal link, e.g. "plexopro.com/1000" — RepId itself always stays the plain number so rep login/lookup keeps matching on it.
         public string? PortalLink { get; set; }
 
-        /// Null unless the Rep welcome email actually sent successfully — see RepsController.Create.
+        /// Null until an admin sends the welcome email — see RepsController.SendWelcomeEmail.
         public DateTime? WelcomeEmailSentAt { get; set; }
 
         // ----- admin-only fields, set after creation from the Rep Details page -----

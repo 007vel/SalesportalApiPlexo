@@ -15,6 +15,7 @@ namespace PlexoRepPortal.Controllers
         private const int RepIdStartingNumber = 1000;
 
         private readonly AppDbContext _db;
+        
         private readonly IConfiguration _configuration;
         private readonly IEncryptionService _encryption;
         private readonly IEmailService _emailService;
@@ -150,19 +151,6 @@ namespace PlexoRepPortal.Controllers
                 }
             }
 
-            try
-            {
-                var loginLink = BuildPortalLink(rep.RepId);
-                var (subject, html) = RepWelcomeEmailTemplate.Build(rep.FullName, rep.Email, rep.RepId, loginLink);
-                await _emailService.SendAsync(rep.Email, userContactemail: null, subject, html, cancellationToken);
-                rep.WelcomeEmailSentAt = DateTime.UtcNow;
-                await _db.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send Rep welcome email to {Email} for RepId {RepId}", rep.Email, rep.RepId);
-            }
-
             var dto = RepDto.FromEntity(rep, Domain, _encryption);
             return CreatedAtAction(nameof(GetById), new { oId = rep.OId }, dto);
         }
@@ -243,6 +231,12 @@ namespace PlexoRepPortal.Controllers
                 return NotFound();
             }
 
+            var emailInUse = await _db.Reps.AnyAsync(r => r.OId != oId && r.Email.ToLower() == request.Email.Trim().ToLower(), cancellationToken);
+            if (emailInUse)
+            {
+                return Conflict($"Email '{request.Email}' is already in use.");
+            }
+
             // IgnoreQueryFilters: same reasoning as GenerateNextRepIdAsync — the unique index on RepId
             // still enforces uniqueness against soft-deleted rows, so this check has to see them too.
             var repIdInUse = await _db.Reps.IgnoreQueryFilters().AnyAsync(r => r.RepId == request.RepId && r.OId != oId, cancellationToken);
@@ -278,6 +272,34 @@ namespace PlexoRepPortal.Controllers
             rep.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
+
+            return Ok(RepDto.FromEntity(rep, Domain, _encryption));
+        }
+
+        // POST api/reps/5/welcome-email — resendable any number of times; admin controls when this goes out.
+        [HttpPost("{oId:int}/welcome-email")]
+        public async Task<ActionResult<RepDto>> SendWelcomeEmail(int oId, CancellationToken cancellationToken)
+        {
+            var rep = await _db.Reps.FirstOrDefaultAsync(r => r.OId == oId, cancellationToken);
+            if (rep is null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var loginLink = BuildPortalLink(rep.RepId);
+                var (subject, html) = RepWelcomeEmailTemplate.Build(rep.FullName, rep.Email, rep.RepId, loginLink);
+                await _emailService.SendAsync(rep.Email, userContactemail: null, subject, html, cancellationToken);
+                rep.WelcomeEmailSentAt = DateTime.UtcNow;
+                rep.UpdatedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send Rep welcome email to {Email} for RepId {RepId}", rep.Email, rep.RepId);
+                return StatusCode(500, $"Failed to send welcome email to {rep.Email}. Please try again.");
+            }
 
             return Ok(RepDto.FromEntity(rep, Domain, _encryption));
         }
